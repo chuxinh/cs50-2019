@@ -37,6 +37,7 @@ def main():
         # Most MasterCard numbers start with 51, 52, 53, 54, or 55
         print("MASTERCARD\n")
     elif is_valid and first_two_digits[0] == '4' and num_digits in [13, 16]:
+        # Visa numbers starts with 4
         print("VISA\n")
     else:
         print("INVALID\n")
