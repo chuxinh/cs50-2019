@@ -13,13 +13,13 @@ gosh darn it
 from cs50 import get_string
 from sys import argv
 
-# the tutorial suggested to use set() here
+# the tutorial suggested use set() here
 # some difference between set and list:
     # A set is an unordered collection with no duplicate elements, only hashable objects can participate (what's hash?)
     # Set objects also support mathematical operations like union, intersection, difference, and symmetric difference
     # List can have duplicates and the order is well defined, can contain any objects
 
-words = set()
+banned_words = set()
 
 def main():
     if len(argv) != 2:
@@ -28,29 +28,28 @@ def main():
         # exit(1) means there was some issue / error / problem and that is why the program is exiting
         exit(1)
 
-    input = (argv[1])
+    file_name = (argv[1])
 
-    file = open(input, "r")
-
-    for line in file:
+    with open(file_name, "r") as file:
+        for line in file:
         # rsplit remove spaces to the right of the string
         # get the word only
-        word = line.rsplit("\n")[0]
-        words.add(word)
+            banned_word = line.rsplit("\n")[0]
+            banned_words.add(banned_word)
     file.close()
 
 
-    message = get_string("What message would you like to censor? \n")
-    string = message.split()
+    message = input("What message would you like to censor? \n")
+    words = message.split()
 
     filtered = []
 
-    for i in string:
-        if i in words:
-                filtered.append("*" * len(i))
+    for word in words:
+        if word in banned_words:
+            iltered.append("*" * len(word))
 
         else:
-            filtered.append(i)
+            filtered.append(word)
 
     new_message = " ".join(map(str, filtered))
 
@@ -59,3 +58,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
