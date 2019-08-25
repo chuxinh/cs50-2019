@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+    <!-- http://getbootstrap.com/docs/4.1/components/alerts/ -->
+    <table class="table">
+      <thead class="thead-light">
+        <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">House</th>
+              <th scope="col">Role</th>
+        </tr>
+      </thead>
+      <tbody>
+            {% for row in table %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                </tr>
+            {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#table').DataTable();
+        } );
+    </script>
+
+
+{% endblock %}
