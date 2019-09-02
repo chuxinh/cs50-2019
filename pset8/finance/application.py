@@ -44,14 +44,71 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+
+    # look up the current user
+    users = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id=session["user_id"])
+    stocks = db.execute(
+        "SELECT symbol, SUM(shares) as total_shares FROM transactions WHERE user_id = :user_id GROUP BY symbol HAVING total_shares > 0", user_id=session["user_id"])
+    quotes = {}
+    current_share_value = 0
+
+    for stock in stocks:
+        quotes[stock["symbol"]] = lookup(stock["symbol"])
+        current_share_value = current_share_value + stock["total_shares"] * quotes[stock["symbol"]]["price"]
+
+
+    cash_remaining = users[0]["cash"]
+    total = cash_remaining + current_share_value
+
+    return render_template("portfolio.html", quotes=quotes, stocks=stocks, total=total, cash_remaining=cash_remaining)
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        quote = lookup(request.form.get("symbol"))
+
+        # Check if the symbol exists
+        if quote == None:
+            return apology("invalid symbol", 400)
+
+        # Check if number of shares is a positive number
+        try:
+            shares = int(request.form.get("shares"))
+        except:
+            return apology("must be positive integer", 400)
+
+        if shares <= 0:
+            return apology("must be greater than 0", 400)
+
+        # Query database for username
+        rows = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id=session["user_id"])
+
+        # How much money left in account
+        cash_remaining = rows[0]["cash"]
+
+        # Check the total purchase price
+        purchase_price = quote["price"] * shares
+
+        if purchase_price > cash_remaining:
+            return apology("not enough funds", 400)
+
+        db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=purchase_price, user_id=session["user_id"])
+
+        db.execute("INSERT INTO transactions (user_id, symbol, shares, price_per_share) VALUES(:user_id, :symbol, :shares, :price)",
+           user_id=session["user_id"],
+           symbol=request.form.get("symbol").upper(),
+           shares=shares,
+           price=quote["price"])
+
+        flash("Bought!")
+
+        return redirect("/")
+
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/check", methods=["GET"])
